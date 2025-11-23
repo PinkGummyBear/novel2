@@ -1,0 +1,458 @@
+{
+  "monologue_intro": [
+    { "speaker": "You", "text": "Finally… I’m a university student. All those years of preparation led to this moment." },
+    { "speaker": "You", "text": "I can’t wait to attend my first class and see what my studies have in store for me." },
+    { "speaker": "You", "text": "But first, I should decide what I want to specialize in. This choice will define my classes, my skills, and my future career." },
+    {
+      "choice": [
+        { "text": "Take the Major Quiz", "next": "major_quiz_intro" },
+        { "text": "Choose manually", "next": "manual_major_choice" }
+      ]
+    }
+  ],
+
+  "manual_major_choice": [
+    {
+      "choice": [
+        { "text": "Law", "next": "major_law", "stats": { "logic": 2 }, "major": "Law" },
+        { "text": "Psychology", "next": "major_psychology", "stats": { "social": 1, "charisma": 1 }, "major": "Psychology" },
+        { "text": "Computer Science", "next": "major_cs", "stats": { "logic": 2 }, "major": "Computer Science" },
+        { "text": "Geology", "next": "major_geology", "stats": { "knowledge": 2 }, "major": "Geology" },
+        { "text": "Nursing", "next": "major_nursing", "stats": { "knowledge": 1, "social": 1 }, "major": "Nursing" }
+      ]
+    }
+  ],
+
+  "major_quiz_intro": [
+  {
+    "speaker": "SYSTEM",
+    "text": "Válaszolj a kérdésekre! A helyes válaszok alapján kiderül, melyik szakhoz illesz leginkább.",
+    "next": "major_quiz_q1"
+  }
+],
+
+"major_quiz_q1": [
+  {
+    "speaker": "SYSTEM",
+    "text": "Geológus: Mi az ásvány?"
+  },
+  {
+    "choice": [
+      { "text": "Mesterséges anyag", "points": { "Geology": 0 }, "next": "major_quiz_q2" },
+      { "text": "Élő organizmus", "points": { "Geology": 0 }, "next": "major_quiz_q2" },
+      { "text": "Természetes, kristályos anyag", "points": { "Geology": 2 }, "next": "major_quiz_q2" },
+      { "text": "Egy üledékes kőzetfajta", "points": { "Geology": 0 }, "next": "major_quiz_q2" },
+      { "text": "Laborban készült szilíciumvegyület", "points": { "Geology": 0 }, "next": "major_quiz_q2" }
+    ]
+  }
+],
+
+"major_quiz_q2": [
+  {
+    "speaker": "SYSTEM",
+    "text": "Apoló: Mi a BLS rövidítés az újraélesztésben?"
+  },
+  {
+    "choice": [
+      { "text": "Basic Life Support", "points": { "Nursing": 2 }, "next": "major_quiz_q3" },
+      { "text": "Blood Level Stabilization", "points": { "Nursing": 0 }, "next": "major_quiz_q3" },
+      { "text": "Body Level System", "points": { "Nursing": 0 }, "next": "major_quiz_q3" },
+      { "text": "Breathing Logic Simulation", "points": { "Nursing": 0 }, "next": "major_quiz_q3" },
+      { "text": "Basic Lung Support", "points": { "Nursing": 0 }, "next": "major_quiz_q3" }
+    ]
+  }
+],
+
+"major_quiz_q3": [
+  {
+    "speaker": "SYSTEM",
+    "text": "Jogász: Mit jelent a 'per'?"
+  },
+  {
+    "choice": [
+      { "text": "Adóbevallás", "points": { "Law": 0 }, "next": "major_quiz_q4" },
+      { "text": "Vita a bíróság előtt", "points": { "Law": 2 }, "next": "major_quiz_q4" },
+      { "text": "Közlekedési bírság", "points": { "Law": 0 }, "next": "major_quiz_q4" },
+      { "text": "Jogi eljárás bűnözők ellen", "points": { "Law": 1 }, "next": "major_quiz_q4" },
+      { "text": "Törvénykezési dokumentum", "points": { "Law": 0 }, "next": "major_quiz_q4" }
+    ]
+  }
+],
+
+"major_quiz_q4": [
+  {
+    "speaker": "SYSTEM",
+    "text": "Informatikus: Mi az algoritmus?"
+  },
+  {
+    "choice": [
+      { "text": "A robotok kedvenc heavy metal zenekara", "points": { "Computer Science": 0 }, "next": "major_quiz_q5" },
+      { "text": "Műveletek sorrendjét meghatározó utasításrendszer", "points": { "Computer Science": 2 }, "next": "major_quiz_q5" },
+      { "text": "Egy egzotikus tánc, amit a programozók járnak", "points": { "Computer Science": 0 }, "next": "major_quiz_q5" },
+      { "text": "Számítógépes hiba típusa", "points": { "Computer Science": 0 }, "next": "major_quiz_q5" },
+      { "text": "Egy hardveres folyamat rövidítése", "points": { "Computer Science": 0 }, "next": "major_quiz_q5" }
+    ]
+  }
+],
+
+"major_quiz_q5": [
+  {
+    "speaker": "SYSTEM",
+    "text": "Pszichológus: Mit jelent az 'asszertív kommunikáció'?"
+  },
+  {
+    "choice": [
+      { "text": "Határozott, de tiszteletteljes önérvényesítés", "points": { "Psychology": 2 }, "next": "quiz_results" },
+      { "text": "Amikor minden mondat után 3 felkiáltójelet teszel!!!", "points": { "Psychology": 0 }, "next": "quiz_results" },
+      { "text": "Amikor addig beszélsz, míg a másik fel nem adja", "points": { "Psychology": 0 }, "next": "quiz_results" },
+      { "text": "A passzív-agresszív kommunikáció egyik formája", "points": { "Psychology": 0 }, "next": "quiz_results" },
+      { "text": "Amikor csak szakmai szókincset használsz", "points": { "Psychology": 0 }, "next": "quiz_results" }
+    ]
+  }
+]
+,
+
+  "quiz_results": [
+  {
+    "speaker": "System",
+    "text": "Calculating your major based on your answers..."
+  },
+  {
+    "endNext": "quiz_result_display"
+  }
+]
+,
+
+  "major_law": [
+    { "speaker": "Professor Hale", "text": "Law! A path where logic and reasoning are key." },
+    { "speaker": "Professor Hale", "text": "Your first course covers civil law and courtroom procedures." },
+    { "speaker": "You", "text": "I’ll need to be sharp, persuasive, and precise in my reasoning." },
+    { "speaker": "SYSTEM", "text": "Open the book icon in the top-right to view your curriculum and track your progress.", "endNext": "first_day_class_choice" }
+  ],
+
+  "major_psychology": [
+    { "speaker": "Professor Hale", "text": "Psychology, excellent! A path that hones social and empathetic skills." },
+    { "speaker": "Professor Hale", "text": "Your first course will explore cognitive processes and human behavior." },
+    { "speaker": "You", "text": "Understanding people’s minds will be key to my success." },
+    { "speaker": "SYSTEM", "text": "Open the book icon in the top-right to view your curriculum and track your progress.", "endNext": "first_day_class_choice" }
+  ],
+
+  "major_cs": [
+    { "speaker": "Professor Hale", "text": "Computer Science! Prepare for coding, algorithms, and problem-solving." },
+    { "speaker": "Professor Hale", "text": "Your first class will introduce programming fundamentals and logic challenges." },
+    { "speaker": "You", "text": "Time to tackle code and sharpen my technical skills." },
+    { "speaker": "SYSTEM", "text": "Open the book icon in the top-right to view your curriculum and track your progress.", "endNext": "first_day_class_choice" }
+  ],
+
+ "major_geology": [
+  { "speaker": "Professor Hale", "text": "Geology! Understanding the Earth is the foundation of many sciences." },
+  { "speaker": "Professor Hale", "text": "Your first class will cover rocks, minerals, and Earth's history." },
+  { "speaker": "You", "text": "I want to uncover how our planet evolved over millions of years." },
+  { "speaker": "SYSTEM", "text": "Open the lab icon in the top-right to start your practical session." },
+  { "speaker": "SYSTEM", "text": "Let’s begin with rock identification!", "endNext": "start_rock_minigame_intro" }
+],
+
+"start_rock_minigame_intro": [
+  { "speaker": "SYSTEM", "text": "Identify the rock shown in the image by choosing the correct name.", "endNext": "start_rock_minigame" }
+],
+
+"start_rock_minigame": [
+  {
+    "speaker": "SYSTEM",
+    "text": "Rock identification starting…",
+    "minigame": {
+      "type": "rock",
+      "successNext": "rock_minigame_success",
+      "failNext": "rock_minigame_fail"
+    }
+  }
+]
+
+,
+
+"rock_minigame_success": [
+  { "speaker": "SYSTEM", "text": "Well done! You correctly identified the rock." },
+  { "speaker": "Professor Hale", "text": "Excellent! You’re developing a keen eye for rocks." },
+  { "speaker": "SYSTEM", "text": "You may continue your studies.", "endNext": "first_day_class_choice" }
+],
+
+"rock_minigame_fail": [
+  { "speaker": "SYSTEM", "text": "Some mistakes were made in identifying the rock." },
+  { "speaker": "Professor Hale", "text": "Take a closer look next time and pay attention to details." },
+  { "speaker": "SYSTEM", "text": "Retry the lab exercise when you’re ready.", "endNext": "first_day_class_choice" }
+],
+
+  "major_nursing": [
+    { "speaker": "Professor Hale", "text": "Nursing! A field focused on caring for others and improving lives." },
+    { "speaker": "Professor Hale", "text": "Your first course covers patient care, basic medical skills, and empathy in practice." },
+    { "speaker": "You", "text": "I want to make a difference in patients' lives and support them effectively." },
+    { "speaker": "SYSTEM", "text": "Open the book icon in the top-right to view your curriculum and track your progress."},
+    { "speaker": "SYSTEM", "text": "Let’s start your first practical test: basic first aid training!", "endNext": "nurse_firstaid_intro" }
+
+  ],
+
+  "quiz_result_display": [
+  { "speaker": "SYSTEM", "text": "Analyzing your answers…" },
+  { "speaker": "SYSTEM", "text": "You have been assigned the major: {player_major}!" }
+],
+
+"nurse_firstaid_intro": [
+  { "speaker": "SYSTEM", "text": "Drag the correct item to treat each patient." },
+  {
+    "choice": [
+      {
+        "text": "Start First Aid Training",
+        "minigame": {
+          "type": "firstaid",
+          "successNext": "nurse_firstaid_success",
+          "failNext": "nurse_firstaid_fail"
+        }
+      }
+    ]
+  }
+]
+,
+
+"nurse_firstaid_success": [
+  { "speaker": "SYSTEM", "text": "Excellent work! All patients are treated correctly." },
+  { "speaker": "Professor Hale", "text": "Well done — you clearly have the instincts of a real nurse." },
+  { "speaker": "SYSTEM", "text": "You may now continue your studies.", "endNext": "first_day_class_choice" }
+],
+
+"nurse_firstaid_fail": [
+  { "speaker": "SYSTEM", "text": "Some patients weren’t treated correctly…" },
+  { "speaker": "Professor Hale", "text": "Mistakes happen, but you’ll need to study harder." },
+  { "speaker": "SYSTEM", "text": "Retry the test when you’re ready.", "endNext": "first_day_class_choice" }
+],
+
+  "first_day_class_choice": [
+    { "speaker": "SYSTEM", "text": "It’s your first day of class. What do you want to do?" },
+    {
+      "choice": [
+        { "text": "Pay full attention", "next": "attend_class", "stats": { "knowledge": 5 } },
+        { "text": "Socialize with classmates", "next": "socialize_class", "stats": { "social": 3, "charisma": 1 } },
+        { 
+          "text": "Try to cheat on the test", 
+          "minigame": {
+            "type": "cheat",
+            "difficulty": "B2",
+            "successNext": "cheat_class_success",
+            "failNext": "cheat_class_fail"
+          }
+        }
+      ]
+    }
+  ],
+
+  "attend_class": [
+    { "speaker": "You", "text": "I decided to pay attention during the lecture and take detailed notes." },
+    { "speaker": "Professor Hale", "text": "Excellent focus, {player_name}. Keep this up and you'll ace the midterm." },
+    { "speaker": "SYSTEM", "text": "Knowledge +5", "stats": { "knowledge": 5 }, "endNext": "evening_choice" }
+  ],
+
+  "socialize_class": [
+    { "speaker": "You", "text": "I ended up chatting with my classmates instead of focusing on the lecture." },
+    { "speaker": "SYSTEM", "text": "Your social skills improved, but your knowledge didn’t grow much.", "stats": { "social": 3, "knowledge": -1 }, "endNext": "evening_choice" }
+  ],
+
+  "cheat_class_success": [
+    { "speaker": "SYSTEM", "text": "You successfully peeked at the notes without getting caught!" },
+    { "speaker": "SYSTEM", "text": "Cheating +3, Knowledge +2", "stats": { "cheating": 3, "knowledge": 2 }, "endNext": "evening_choice" }
+  ],
+
+  "cheat_class_fail": [
+    { "speaker": "Professor Hale", "text": "Caught you! That’s a warning, {player_name}." },
+    { "speaker": "SYSTEM", "text": "Cheating -2, Social -3", "stats": { "cheating": -2, "social": -3 }, "endNext": "evening_choice" }
+  ],
+
+  "evening_choice": [
+    { "speaker": "SYSTEM", "text": "The first day is over. What would you like to do this evening?" },
+    {
+      "choice": [
+        { "text": "Study more", "next": "study_evening", "stats": { "knowledge": 2, "hunger": -5, "thirst": -5, "fatigue": 10 } },
+        { "text": "Hang out with friends", "next": "social_evening", "stats": { "social": 4, "hunger": -5, "thirst": -5, "fatigue": 5 } },
+        { "text": "Work a part-time job", "next": "job_evening" },
+        { "text": "Go to sleep early", "next": "sleep_evening" }
+      ]
+    }
+  ],
+
+ "study_evening": [
+  { "speaker": "SYSTEM", "text": "You have some free time this evening. How do you want to study?" },
+  {
+    "choice": [
+      { 
+        "text": "Study in dorm", 
+        "next": "study_in_dorm", 
+        "stats": { "knowledge": 2, "fatigue": 10, "hunger": -5, "thirst": -5 } 
+      },
+      { 
+        "text": "Go to library", 
+        "stats": {}, 
+        "minigame": { 
+          "type": "library", 
+          "difficulty": "medium", 
+          "successNext": "library_success", 
+          "failNext": "library_fail" 
+        }
+      }
+    ]
+  }
+]
+,
+
+"study_in_dorm": [
+  { "speaker": "You", "text": "I stayed in my dorm and reviewed my lecture notes." },
+  { "speaker": "SYSTEM", "text": "Knowledge +2. You got a bit tired and hungry.", "stats": { "knowledge": 2, "fatigue": 10, "hunger": -5, "thirst": -5 }, "endNext": "next_day_morning" }
+],
+
+"library_success": [
+  { "speaker": "You", "text": "I studied efficiently in the library and found some useful resources!" },
+  { "speaker": "SYSTEM", "text": "Knowledge +5, Fatigue +15. Bonus: You discovered a rare book that might help later.", "stats": { "knowledge": 5, "fatigue": 15, "libraryBook": 1 }, "endNext": "next_day_morning" }
+],
+
+"library_fail": [
+  { "speaker": "You", "text": "I tried to study in the library but got distracted by other students." },
+  { "speaker": "SYSTEM", "text": "Knowledge +1, Fatigue +10. Not the most productive session.", "stats": { "knowledge": 1, "fatigue": 10 }, "endNext": "next_day_morning" }
+]
+,
+
+  "social_evening": [
+    { "speaker": "You", "text": "I met up with some friends in the dorm common room." },
+    { "speaker": "SYSTEM", "text": "Social +4, Fatigue +5. It was a fun evening!", "endNext": "next_day_morning" }
+  ],
+
+  "job_evening": [
+    { "speaker": "SYSTEM", "text": "You decided to take a part-time job to earn some UniCoins." },
+    {
+      "choice": [
+        { 
+          "text": "Work at the campus café", 
+          "minigame": { 
+            "type": "cafe", 
+            "difficulty": "easy", 
+            "nextScene": "next_day_morning" 
+          } 
+        },
+        { 
+          "text": "Assist a professor in research", 
+          "next": "job_research" 
+        }
+      ]
+    }
+  ],
+
+  "job_research": [
+    { "speaker": "You", "text": "I assisted a professor with a small data project after class." },
+    { "speaker": "SYSTEM", "text": "Earned 40 UniCoin, +2 Knowledge. Fatigue +15.", "stats": { "money": 40, "knowledge": 2, "fatigue": 15 }, "endNext": "next_day_morning" }
+  ],
+
+  "sleep_evening": [
+    { "speaker": "You", "text": "I decided to rest early and get some proper sleep." },
+    { "speaker": "SYSTEM", "text": "Fatigue reduced by 40. You feel refreshed for the next day!", "stats": { "fatigue": -40 }, "endNext": "dorm_entry" }
+  ],
+
+  "dorm_entry": [
+  { "speaker": "SYSTEM", "text": "You return to your dorm room to rest and plan your next steps." },
+  { "endNext": "dorm_room" }
+]
+,
+"dorm_room": [
+  { "speaker": "SYSTEM", "text": "You are in your room. Take a rest or check quests.", "endNext": "" }
+],
+
+  "next_day_morning": [
+    { "speaker": "SYSTEM", "text": "The next day begins. You grab a quick breakfast and head to class.", "endNext": "second_day_class" }
+  ],
+
+  "second_day_class": [
+    { "speaker": "Professor Hale", "text": "Today, we’re doing a surprise quiz on yesterday’s lecture!" },
+    {
+      "choice": [
+        { "text": "Answer honestly", "next": "honest_quiz", "stats": { "knowledge": 2 } },
+        { 
+          "text": "Try to cheat again", 
+          "minigame": {
+            "type": "cheat",
+            "difficulty": "B2",
+            "successNext": "cheat_quiz_success",
+            "failNext": "cheat_quiz_fail"
+          }
+        }
+      ]
+    }
+  ],
+
+  "honest_quiz": [
+    { "speaker": "You", "text": "I focused and did my best to recall everything I studied." },
+    { "speaker": "SYSTEM", "text": "You did well! Knowledge +3.", "stats": { "knowledge": 3 }, "endNext": "lunch_time" }
+  ],
+
+  "cheat_quiz_success": [
+    { "speaker": "SYSTEM", "text": "You managed to cheat without being noticed!" },
+    { "speaker": "SYSTEM", "text": "Cheating +4, Knowledge +2", "stats": { "cheating": 4, "knowledge": 2 }, "endNext": "lunch_time" }
+  ],
+
+  "cheat_quiz_fail": [
+    { "speaker": "Professor Hale", "text": "Caught you again! This is your final warning, {player_name}." },
+    { "speaker": "SYSTEM", "text": "Cheating -3, Social -4", "stats": { "cheating": -3, "social": -4 }, "endNext": "lunch_time" }
+  ],
+
+  "lunch_time": [
+    { "speaker": "SYSTEM", "text": "It’s lunchtime. You’re getting hungry." },
+    {
+      "choice": [
+        { "text": "Buy food at the cafeteria (-10 UniCoin)", "next": "eat_lunch", "moneyChange": -10, "stats": { "hunger": -30 } },
+        { "text": "Skip lunch", "next": "skip_lunch", "stats": { "hunger": 10 } }
+      ]
+    }
+  ],
+
+  "eat_lunch": [
+    { "speaker": "You", "text": "You bought some food and ate quickly, feeling less hungry." },
+    { "speaker": "SYSTEM", "text": "Hunger -30", "stats": { "hunger": -30 }, "endNext": "afternoon_class" }
+  ],
+
+  "skip_lunch": [
+    { "speaker": "You", "text": "You decided to skip lunch. You feel a bit weaker and hungrier." },
+    { "speaker": "SYSTEM", "text": "Hunger +10", "stats": { "hunger": 10 }, "endNext": "afternoon_class" }
+  ],
+
+  "afternoon_class": [
+    { "speaker": "Professor Hale", "text": "Remember — consistency matters more than talent!" },
+    { "speaker": "You", "text": "I guess that means I should keep showing up..." },
+    { "speaker": "SYSTEM", "text": "Second day completed! You earned experience for attendance.", "endNext": "weekend_intro" }
+  ],
+
+  "weekend_intro": [
+    { "speaker": "SYSTEM", "text": "It’s finally the weekend! Time to recharge or be productive." },
+    {
+      "choice": [
+        { "text": "Relax and rest", "next": "weekend_rest", "stats": { "fatigue": -50, "hunger": -10 } },
+        { "text": "Study ahead", "next": "weekend_study", "stats": { "knowledge": 5, "fatigue": 15 } },
+        { "text": "Go out with friends", "next": "weekend_fun", "stats": { "social": 5, "money": -20 } }
+      ]
+    }
+  ],
+
+  "weekend_rest": [
+    { "speaker": "You", "text": "I stayed in bed all day and watched random videos." },
+    { "speaker": "SYSTEM", "text": "Fatigue fully recovered. You feel great!", "endNext": "next_week_start" }
+  ],
+
+  "weekend_study": [
+    { "speaker": "You", "text": "I used the weekend to get ahead on readings." },
+    { "speaker": "SYSTEM", "text": "Knowledge +5. A productive start to next week!", "endNext": "next_week_start" }
+  ],
+
+  "weekend_fun": [
+    { "speaker": "You", "text": "I went out with friends, laughing the night away." },
+    { "speaker": "SYSTEM", "text": "Social +5, but you spent 20 UniCoin.", "endNext": "next_week_start" }
+  ],
+
+  "next_week_start": [
+    { "speaker": "SYSTEM", "text": "Week 2 begins. You’ve survived your first week at Diplomacy Academy!" },
+    { "speaker": "You", "text": "Not bad for a freshman... Let's see what’s next." },
+    { "speaker": "SYSTEM", "text": "— End of Week 1 Demo —" }
+  ]
+}

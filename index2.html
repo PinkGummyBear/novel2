@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diplomacy Academy</title>
+  <link rel="stylesheet" href="style2.css">
+</head>
+<body>
+
+  <!-- Start Screen -->
+  <div id="startScreen">
+    <h1>🎓 Diplomacy Academy</h1>
+    <label>Name:
+      <input type="text" id="playerName" placeholder="Enter your name">
+    </label>
+
+    <label>Gender:
+      <select id="playerGender">
+        <option value="">Select</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+    </label>
+
+    <button id="startBtn">Start Game</button>
+    <button id="loadBtn">Load Game</button>
+  </div>
+
+  <!-- Character Customization Screen -->
+  <div id="customizationScreen" style="display: none;">
+    <h2>Character Customization</h2>
+    <p style="margin-bottom: 20px; color: #e0e0e0;">Choose how your character looks before starting your journey.</p>
+
+    <label>Hair Color:
+      <select id="hairColor">
+        <option value="brown">Brown</option>
+        <option value="black">Black</option>
+        <option value="blonde">Blonde</option>
+        <option value="red">Red</option>
+        <option value="white">White</option>
+      </select>
+    </label>
+
+    <label>Eye Color:
+      <select id="eyeColor">
+        <option value="brown">Brown</option>
+        <option value="blue">Blue</option>
+        <option value="green">Green</option>
+        <option value="gray">Gray</option>
+        <option value="hazel">Hazel</option>
+      </select>
+    </label>
+
+    <label>Hairstyle:
+      <select id="hairstyle">
+        <option value="short">Short</option>
+        <option value="medium">Medium</option>
+        <option value="long">Long</option>
+        <option value="ponytail">Ponytail</option>
+        <option value="undercut">Undercut</option>
+      </select>
+    </label>
+
+    <label>Clothes:
+      <select id="clothes">
+        <option value="casual">Casual</option>
+        <option value="formal">Formal</option>
+        <option value="sporty">Sporty</option>
+        <option value="trendy">Trendy</option>
+      </select>
+    </label>
+
+    <button id="confirmAppearance">Confirm Appearance</button>
+  </div>
+
+  <!-- Main Game Screen -->
+  <div id="mainGame" style="display: none;">
+    <!-- Background Layer -->
+    <div id="gameBackground"></div>
+
+    <!-- Top UI Bar -->
+    <div id="topUI">
+      <div id="statsBox"></div>
+      <div id="bookIcon" title="View Curriculum">📘</div>
+    </div>
+
+    <!-- Character Sprite (Behind dialogue box) -->
+    <div id="characterSprite"></div>
+
+    <!-- Dialogue Container (Bottom of screen) -->
+    <div id="dialogueContainer">
+      <div id="dialogueBox">
+        <div id="nameBox"></div>
+        <div id="textBox"></div>
+      </div>
+    </div>
+
+    <!-- Choices (Above dialogue box) -->
+    <div id="choices"></div>
+
+    <!-- Game Controls -->
+    <div id="gameControls">
+      <button onclick="saveGame()">💾 Save</button>
+      <button onclick="resetGame()">🔄 Reset</button>
+    </div>
+  </div>
+
+  <!-- Minigame Screen -->
+  <div id="minigameScreen" style="display:none;">
+    <div id="minigameHeader">
+      <h2 id="minigameTitle">Minigame</h2>
+      <div id="minigameTimer">Time: <span id="minigameTime">0</span>s</div>
+    </div>
+
+    <div id="minigameArea">
+      <div id="ordersContainer"></div>
+    </div>
+
+    <div id="minigameFooter">
+      <div id="minigameResult"></div>
+      <button id="minigameQuit">Quit</button>
+    </div>
+  </div>
+
+  <!-- Curriculum Modal -->
+  <div id="curriculumModal" class="modal" style="display:none;">
+    <div class="modalContent">
+      <button id="closeCurriculum">✕ Close</button>
+      <h3>📚 Curriculum</h3>
+      <div id="curriculumList"></div>
+    </div>
+  </div>
+
+  <!-- Dorm Room Screen -->
+  <div id="dormRoomScreen" style="display:none;">
+    <h2>🏠 Kollégiumi szoba</h2>
+    <div id="dormStats"></div>
+    <button id="restBtn">😴 Pihenés / Alvás</button>
+    <h3>Elérhető questek</h3>
+    <div id="questList"></div>
+    <button id="exitDormBtn">🚪 Vissza a játékba</button>
+  </div>
+
+  <script src="game2.js"></script>
+</body>
+</html>

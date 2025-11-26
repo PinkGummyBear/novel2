@@ -33,7 +33,9 @@ const choicesBox = document.getElementById("choices");
 const statsBox = document.getElementById("statsBox");
 
 const bookIcon = document.getElementById("bookIcon");
-const startCafeBtn = document.getElementById("startCafeBtn");
+
+// Character sprite container
+const characterSpriteContainer = document.getElementById("characterSprite");
 
 // Minigame elements
 const minigameTitle = document.getElementById("minigameTitle");
@@ -41,12 +43,16 @@ const minigameTime = document.getElementById("minigameTime");
 const ordersContainer = document.getElementById("ordersContainer");
 const minigameQuit = document.getElementById("minigameQuit");
 const minigameResult = document.getElementById("minigameResult");
+const minigameArea = document.getElementById("minigameArea");
 
 const closeCurriculum = document.getElementById("closeCurriculum");
 const curriculumList = document.getElementById("curriculumList");
 
-
-
+const dormRoomScreen = document.getElementById("dormRoomScreen");
+const dormStats = document.getElementById("dormStats");
+const restBtn = document.getElementById("restBtn");
+const exitDormBtn = document.getElementById("exitDormBtn");
+const questList = document.getElementById("questList");
 
 // ------------------ Game Variables ------------------
 let scenes = {};
@@ -56,11 +62,42 @@ let cachedScenes = null;
 
 let quizScores = {
   "Marketing": 0, "Psychology": 0, "ComputerScience": 0, "Law": 0,
-  "Astronomy": 0, "Geology": 0, "Business/Management": 0
+  "Astronomy": 0, "Geology": 0, "Business/Management": 0, "Nursing": 0
 };
 
+// ------------------ Character Sprite Functions ------------------
+function updateCharacterSprite() {
+  if (!characterSpriteContainer) return;
+  
+  characterSpriteContainer.innerHTML = "";
+  
+  if (player.gender === "male") {
+    const maleSprite = document.createElement("img");
+    maleSprite.src = "images/boy.png";
+    maleSprite.alt = "Male Character";
+    maleSprite.className = "character-sprite";
+    characterSpriteContainer.appendChild(maleSprite);
+  } else if (player.gender === "female") {
+    const femaleSprite = document.createElement("img");
+    femaleSprite.src = "images/girl.png";
+    femaleSprite.alt = "Female Character";
+    femaleSprite.className = "character-sprite";
+    characterSpriteContainer.appendChild(femaleSprite);
+  }
+}
 
-
+function handleCharacterDisplay(speaker) {
+  if (!characterSpriteContainer) return;
+  
+  if (speaker === "You") {
+    characterSpriteContainer.style.display = "block";
+    characterSpriteContainer.classList.add("show");
+    updateCharacterSprite();
+  } else {
+    characterSpriteContainer.style.display = "none";
+    characterSpriteContainer.classList.remove("show");
+  }
+}
 
 // ------------------ Start / UI logic ------------------
 startBtn.onclick = () => {
@@ -79,7 +116,9 @@ confirmAppearanceBtn.onclick = () => {
   player.appearance.clothes = clothesSelect.value;
 
   customizationScreen.style.display = "none";
-  mainGame.style.display = "block";
+  mainGame.style.display = "flex";
+
+  updateCharacterSprite();
 
   currentScene = "monologue_intro";
   lineIndex = 0;
@@ -133,7 +172,7 @@ const curriculum = {
     { semester: 6, courses: [
       { name: "Regionális földtan", status: "none" },
       { name: "Talajtan", status: "none" },
-      { name: "Üledéskes medencék fejlődése", status: "none" },
+      { name: "Üledéses medencék fejlődése", status: "none" },
       { name: "Szakmai gyakorlat", status: "none" }
     ]},
     { semester: 7, courses: [
@@ -246,7 +285,7 @@ const curriculum = {
       { name: "Adatszerkezetek és algoritmusok", status: "none" },
       { name: "Számítógép-architektúra", status: "none" },
       { name: "Operációs rendszerek", status: "none" },
-      { name: "Objektumorientált programozás", status: "none" }
+      { name: "Objektorientált programozás", status: "none" }
     ]},
     { semester: 3, courses: [
       { name: "Adatbázisok", status: "none" },
@@ -318,7 +357,6 @@ const curriculum = {
   ]
 };
 
-
 loadBtn.onclick = () => {
   if (!loadGame()) alert("No save found!");
 };
@@ -340,9 +378,8 @@ bookIcon.onclick = () => {
 
     semester.courses.forEach(course => {
       const courseEl = document.createElement("div");
-      // státusz alapján színezés
       switch(course.status) {
-        case "none": courseEl.style.color = "black"; break;
+        case "none": courseEl.style.color = "white"; break;
         case "taken": courseEl.style.color = "lightblue"; break;
         case "completed": courseEl.style.color = "green"; break;
         case "failed": courseEl.style.color = "red"; break;
@@ -354,13 +391,8 @@ bookIcon.onclick = () => {
 
   curriculumModal.style.display = "flex";
 };
-console.log("Current major:", player.major);
-
 
 closeCurriculum.onclick = () => curriculumModal.style.display = "none";
-
-
-
 
 // ------------------ Load Scenes ------------------
 function loadScenes() {
@@ -369,7 +401,7 @@ function loadScenes() {
     updateStatsDisplay();
     showLine();
   } else {
-    fetch("scenes2.json")
+    fetch("scenes.json")
       .then(res => res.json())
       .then(data => {
         scenes = data;
@@ -425,7 +457,6 @@ const statIcons = {
   money: "💰"
 };
 
-
 function createBar(value) {
   const barLength = 10;
   const filled = Math.max(0, Math.min(10, Math.round((value / 100) * barLength)));
@@ -434,32 +465,28 @@ function createBar(value) {
 
 // ------------------ VN showLine ------------------
 function showLine() {
-  console.log("[showLine] ENTER — currentScene:", currentScene, "lineIndex:", lineIndex);
-  // ---- Kollégiumi szoba jelenet ----
-if (currentScene === "dorm_room") {
-  console.log("[Dorm] Beléptél a kollégiumi szobába");
+  console.log("[showLine] ENTER – currentScene:", currentScene, "lineIndex:", lineIndex);
   
-  // statok megjelenítése
-  dormStats.innerHTML = `
-    🍞 Éhség: ${player.needs.hunger}%<br>
-    💧 Szomjúság: ${player.needs.thirst}%<br>
-    😴 Fáradtság: ${player.needs.fatigue}%<br>
-    📚 Tudás: ${player.knowledge}<br>
-    🎉 Szociális: ${player.social}
-  `;
+  if (currentScene === "dorm_room") {
+    console.log("[Dorm] Beléptél a kollégiumi szobába");
+    
+    dormStats.innerHTML = `
+      🍞 Éhség: ${player.needs.hunger}%<br>
+      💧 Szomjúság: ${player.needs.thirst}%<br>
+      😴 Fáradtság: ${player.needs.fatigue}%<br>
+      📚 Tudás: ${player.knowledge}<br>
+      🎉 Szociális: ${player.social}
+    `;
 
-  // teszt jellegű questlista
-  questList.innerHTML = `
-    <p>📖 Tanulás – növeli a Tudást</p>
-    <p>🗣️ Barátkozás – növeli a Szociálist</p>
-  `;
+    questList.innerHTML = `
+      <p>📖 Tanulás – növeli a Tudást</p>
+      <p>🗣️ Barátkozás – növeli a Szociálist</p>
+    `;
 
-  // fő UI elrejtése, dorm megjelenítése
-  mainGame.style.display = "none";
-  dormRoomScreen.style.display = "block";
-  return;
-}
-
+    mainGame.style.display = "none";
+    dormRoomScreen.style.display = "block";
+    return;
+  }
 
   const scene = scenes[currentScene];
   if (!scene) {
@@ -467,23 +494,18 @@ if (currentScene === "dorm_room") {
     return;
   }
  
-
   const line = scene[lineIndex];
   if (!line) {
-    // End of scene without next line
     return;
   }
 
-  // Display the current line
   displayText(line.speaker || "", formatText(line.text));
 
-  // ---- Minigame handling ----
   if (line.minigame) {
     startMinigame(line.minigame.type, line.minigame);
     return;
   }
 
-  // ---- Automatic transitions ----
   if (line.endNext) {
     currentScene = line.endNext;
     lineIndex = 0;
@@ -498,26 +520,19 @@ if (currentScene === "dorm_room") {
     return;
   }
 
-  // ---- Choices ----
   if (line.choice) {
     displayChoices(line.choice);
     return;
   }
 
-  // ---- Special scenes ----
   if (currentScene === "quiz_result_display") {
     finishMajorQuiz();
     return;
   }
 
-
-
-  // ---- Prepare for next line on next click ----
   lineIndex++;
 }
 
-
-// Advance story helper
 function advanceStory(nextScene) {
   console.log("[advanceStory] called with:", nextScene);
   currentScene = nextScene;
@@ -525,23 +540,21 @@ function advanceStory(nextScene) {
   showLine();
 }
 
-
-
-// ------------------ CheatMinigameB2 (kept as requested) ------------------
+// ------------------ Enhanced CheatMinigameB2 ------------------
 class CheatMinigameB2 {
   constructor(successCallback, failCallback) {
     this.successCallback = successCallback;
     this.failCallback = failCallback;
     this.successCount = 0;
-    this.requiredSuccess = 3; // 3 sikeres nyomás kell
+    this.requiredSuccess = 3;
     this.failCount = 0;
-    this.maxFails = 3; // 3 hibás nyomás után vesztes
+    this.maxFails = 3;
     this.active = false;
     this.pointerPos = 0;
     this.direction = 1;
-    this.speed = 5; // pointer sebesség
-    this.zoneStart = 40; // zöld zóna kezdete %
-    this.zoneEnd = 60;   // zöld zóna vége %
+    this.speed = 3;
+    this.zoneStart = 40;
+    this.zoneEnd = 60;
     this.interval = null;
     this.createUI();
   }
@@ -551,45 +564,86 @@ class CheatMinigameB2 {
     this.container.id = "cheat-game";
     Object.assign(this.container.style, {
       position: "fixed", top: "0", left: "0", width: "100%", height: "100%",
-      background: "rgba(0,0,0,0.7)", display: "flex",
-      flexDirection: "column", justifyContent: "center", alignItems: "center", zIndex: "9999"
+      background: "linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(22, 33, 62, 0.98) 100%)",
+      display: "flex", flexDirection: "column", justifyContent: "center", 
+      alignItems: "center", zIndex: "9999"
     });
 
-    // Game bar
+    const title = document.createElement("h2");
+    title.innerText = "🕵️ Cheating Challenge";
+    Object.assign(title.style, {
+      color: "#8be9fd", fontSize: "36px", marginBottom: "20px",
+      textShadow: "0 0 20px rgba(139, 233, 253, 0.6)"
+    });
+    this.container.appendChild(title);
+
+    this.scoreboard = document.createElement("div");
+    Object.assign(this.scoreboard.style, {
+      color: "#f1fa8c", fontSize: "20px", marginBottom: "30px",
+      background: "rgba(0,0,0,0.5)", padding: "15px 30px", borderRadius: "10px",
+      border: "2px solid rgba(139, 233, 253, 0.3)"
+    });
+    this.updateScoreboard();
+    this.container.appendChild(this.scoreboard);
+
+    const barContainer = document.createElement("div");
+    Object.assign(barContainer.style, {
+      width: "600px", padding: "20px", background: "rgba(0,0,0,0.7)",
+      borderRadius: "15px", border: "2px solid rgba(139, 233, 253, 0.5)"
+    });
+
     this.bar = document.createElement("div");
     Object.assign(this.bar.style, {
-      width: "400px", height: "30px", background: "#444", position: "relative", borderRadius: "5px"
+      width: "100%", height: "40px", background: "#2a2a4a", 
+      position: "relative", borderRadius: "10px", overflow: "hidden",
+      boxShadow: "inset 0 2px 10px rgba(0,0,0,0.5)"
     });
-    this.container.appendChild(this.bar);
+    barContainer.appendChild(this.bar);
 
-    // Green zone
     this.zone = document.createElement("div");
     Object.assign(this.zone.style, {
-      position: "absolute",
-      left: `${this.zoneStart}%`,
-      width: `${this.zoneEnd - this.zoneStart}%`,
-      height: "100%",
-      background: "green"
+      position: "absolute", left: `${this.zoneStart}%`,
+      width: `${this.zoneEnd - this.zoneStart}%`, height: "100%",
+      background: "linear-gradient(135deg, #4ade80 0%, #22c55e 100%)",
+      boxShadow: "0 0 20px rgba(74, 222, 128, 0.5)"
     });
     this.bar.appendChild(this.zone);
 
-    // Pointer
     this.pointer = document.createElement("div");
     Object.assign(this.pointer.style, {
-      position: "absolute", left: "0%", width: "10px", height: "100%", background: "yellow"
+      position: "absolute", left: "0%", width: "4px", height: "100%",
+      background: "linear-gradient(to bottom, #fbbf24, #f59e0b)",
+      boxShadow: "0 0 15px rgba(251, 191, 36, 0.8)",
+      transition: "left 0.02s linear"
     });
     this.bar.appendChild(this.pointer);
 
-    // Instructions
+    this.container.appendChild(barContainer);
+
     this.instruction = document.createElement("div");
-    this.instruction.innerText = `Press SPACE when the pointer is in the green zone!`;
-    Object.assign(this.instruction.style, { color: "#fff", marginTop: "20px" });
+    this.instruction.innerHTML = `
+      <div style="margin-top: 30px; text-align: center;">
+        <div style="color: white; font-size: 22px; margin-bottom: 10px;">
+          Press <span style="background: rgba(139, 233, 253, 0.3); padding: 5px 15px; border-radius: 5px; font-weight: bold;">SPACE</span> when in the green zone!
+        </div>
+        <div style="color: #94a3b8; font-size: 16px;">
+          Get ${this.requiredSuccess} successful hits. ${this.maxFails} mistakes allowed.
+        </div>
+      </div>
+    `;
     this.container.appendChild(this.instruction);
 
     document.body.appendChild(this.container);
     this.active = true;
     this.start();
     this.bindKeys();
+  }
+
+  updateScoreboard() {
+    this.scoreboard.innerHTML = `
+      ✅ Successes: ${this.successCount}/${this.requiredSuccess} &nbsp;&nbsp;|&nbsp;&nbsp;
+      ❌ Failures: ${this.failCount}/${this.maxFails}
+    `;
   }
 
   start() {
@@ -606,14 +660,21 @@ class CheatMinigameB2 {
     this.keyHandler = (e) => {
       if (!this.active) return;
       if (e.code === "Space") {
+        e.preventDefault();
         if (this.pointerPos >= this.zoneStart && this.pointerPos <= this.zoneEnd) {
           this.successCount++;
           this.flashZone("success");
-          if (this.successCount >= this.requiredSuccess) this.end(true);
+          this.updateScoreboard();
+          if (this.successCount >= this.requiredSuccess) {
+            setTimeout(() => this.end(true), 500);
+          }
         } else {
           this.failCount++;
           this.flashZone("fail");
-          if (this.failCount >= this.maxFails) this.end(false);
+          this.updateScoreboard();
+          if (this.failCount >= this.maxFails) {
+            setTimeout(() => this.end(false), 500);
+          }
         }
       }
     };
@@ -621,21 +682,71 @@ class CheatMinigameB2 {
   }
 
   flashZone(type) {
-    this.zone.style.background = type === "success" ? "lime" : "red";
-    setTimeout(() => { this.zone.style.background = "green"; }, 300);
+    const originalBg = this.zone.style.background;
+    if (type === "success") {
+      this.zone.style.background = "linear-gradient(135deg, #86efac 0%, #4ade80 100%)";
+      this.zone.style.boxShadow = "0 0 30px rgba(134, 239, 172, 0.9)";
+      this.createParticles("success");
+    } else {
+      this.zone.style.background = "linear-gradient(135deg, #fca5a5 0%, #ef4444 100%)";
+      this.zone.style.boxShadow = "0 0 30px rgba(252, 165, 165, 0.9)";
+      this.container.style.animation = "shake 0.3s";
+    }
+    setTimeout(() => {
+      this.zone.style.background = originalBg;
+      this.zone.style.boxShadow = "0 0 20px rgba(74, 222, 128, 0.5)";
+      this.container.style.animation = "";
+    }, 300);
+  }
+
+  createParticles(type) {
+    for (let i = 0; i < 8; i++) {
+      const particle = document.createElement("div");
+      const size = Math.random() * 8 + 4;
+      Object.assign(particle.style, {
+        position: "absolute",
+        width: size + "px",
+        height: size + "px",
+        background: type === "success" ? "#4ade80" : "#ef4444",
+        borderRadius: "50%",
+        left: "50%",
+        top: "50%",
+        pointerEvents: "none",
+        animation: `particle-${i} 0.6s ease-out forwards`
+      });
+      this.container.appendChild(particle);
+      setTimeout(() => particle.remove(), 600);
+    }
   }
 
   end(success) {
     this.active = false;
     clearInterval(this.interval);
     document.removeEventListener("keydown", this.keyHandler);
-    if (this.container && this.container.parentNode) document.body.removeChild(this.container);
-    if (success) this.successCallback();
-    else this.failCallback();
+    
+    const result = document.createElement("div");
+    Object.assign(result.style, {
+      position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+      background: "rgba(0,0,0,0.9)", padding: "40px 60px", borderRadius: "20px",
+      border: `3px solid ${success ? "#4ade80" : "#ef4444"}`,
+      textAlign: "center", animation: "scaleIn 0.3s ease-out"
+    });
+    result.innerHTML = `
+      <div style="font-size: 48px; margin-bottom: 20px;">${success ? "✅" : "❌"}</div>
+      <div style="color: ${success ? "#4ade80" : "#ef4444"}; font-size: 28px; font-weight: bold;">
+        ${success ? "Success!" : "Caught!"}
+      </div>
+    `;
+    this.container.appendChild(result);
+
+    setTimeout(() => {
+      if (this.container && this.container.parentNode) document.body.removeChild(this.container);
+      if (success) this.successCallback();
+      else this.failCallback();
+    }, 1500);
   }
 }
 
-// Wrapper to start cheat minigame (single definition)
 function startCheatMinigame(successNext, failNext) {
   new CheatMinigameB2(
     () => advanceStory(successNext),
@@ -643,15 +754,16 @@ function startCheatMinigame(successNext, failNext) {
   );
 }
 
-
+// ------------------ Enhanced FirstAidMinigame ------------------
 class FirstAidMinigame {
   constructor(successCallback, failCallback) {
     this.successCallback = successCallback;
     this.failCallback = failCallback;
     this.correctMatches = 0;
     this.totalNeeded = 3;
-    this.failCount = 0;
-    this.maxFails = 2;
+    this.wrongAttempts = 0;
+    this.maxWrong = 3;
+    this.matchedPatients = new Set();
     this.createUI();
   }
 
@@ -659,59 +771,158 @@ class FirstAidMinigame {
     this.container = document.createElement("div");
     Object.assign(this.container.style, {
       position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-      background: "rgba(0,0,0,0.7)", display: "flex", flexDirection: "column",
-      justifyContent: "center", alignItems: "center", zIndex: "9999"
+      background: "linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(22, 33, 62, 0.98) 100%)",
+      display: "flex", flexDirection: "column", justifyContent: "center",
+      alignItems: "center", zIndex: "9999", padding: "40px"
     });
 
     const title = document.createElement("h2");
-    title.innerText = "Drag each item to the correct patient!";
-    title.style.color = "white";
+    title.innerText = "🏥 First Aid Training";
+    Object.assign(title.style, {
+      color: "#8be9fd", fontSize: "36px", marginBottom: "10px",
+      textShadow: "0 0 20px rgba(139, 233, 253, 0.6)"
+    });
     this.container.appendChild(title);
 
-    // Beteg szekció
+    const subtitle = document.createElement("div");
+    subtitle.innerText = "Drag the correct medical supplies to each patient";
+    Object.assign(subtitle.style, {
+      color: "#94a3b8", fontSize: "18px", marginBottom: "30px"
+    });
+    this.container.appendChild(subtitle);
+
+    this.scoreDisplay = document.createElement("div");
+    Object.assign(this.scoreDisplay.style, {
+      color: "#f1fa8c", fontSize: "20px", marginBottom: "20px",
+      background: "rgba(0,0,0,0.5)", padding: "10px 25px", borderRadius: "10px",
+      border: "2px solid rgba(139, 233, 253, 0.3)"
+    });
+    this.updateScore();
+    this.container.appendChild(this.scoreDisplay);
+
     this.patients = [
-      { id: "cut", text: "Bleeding wound 🩸", correct: "bandage" },
-      { id: "bruise", text: "Bruise 🤕", correct: "icepack" },
-      { id: "burn", text: "Burn 🔥", correct: "water" }
+      { id: "cut", text: "Bleeding Wound", emoji: "🩸", correct: "bandage", matched: false },
+      { id: "bruise", text: "Swollen Bruise", emoji: "🤕", correct: "icepack", matched: false },
+      { id: "burn", text: "Minor Burn", emoji: "🔥", correct: "water", matched: false }
     ];
 
     const patientArea = document.createElement("div");
-    Object.assign(patientArea.style, { display: "flex", gap: "20px", marginTop: "30px" });
+    Object.assign(patientArea.style, {
+      display: "flex", gap: "25px", marginTop: "30px", marginBottom: "40px"
+    });
 
+    this.patientSlots = {};
     this.patients.forEach(p => {
       const slot = document.createElement("div");
       slot.id = p.id;
-      slot.innerText = p.text;
       Object.assign(slot.style, {
-        width: "120px", height: "120px", border: "2px dashed white",
-        color: "white", textAlign: "center", lineHeight: "120px"
+        width: "180px", height: "200px",
+        border: "3px dashed rgba(139, 233, 253, 0.5)",
+        borderRadius: "15px",
+        color: "white", textAlign: "center",
+        display: "flex", flexDirection: "column",
+        justifyContent: "center", alignItems: "center",
+        background: "rgba(0,0,0,0.4)",
+        transition: "all 0.3s ease",
+        backdropFilter: "blur(10px)"
       });
-      slot.ondragover = e => e.preventDefault();
-      slot.ondrop = e => this.handleDrop(e, p);
+      
+      const emoji = document.createElement("div");
+      emoji.innerText = p.emoji;
+      emoji.style.fontSize = "48px";
+      emoji.style.marginBottom = "15px";
+      slot.appendChild(emoji);
+      
+      const text = document.createElement("div");
+      text.innerText = p.text;
+      text.style.fontSize = "18px";
+      text.style.fontWeight = "bold";
+      slot.appendChild(text);
+      
+      slot.ondragover = e => {
+        e.preventDefault();
+        if (!p.matched) {
+          slot.style.borderColor = "rgba(139, 233, 253, 0.9)";
+          slot.style.background = "rgba(139, 233, 253, 0.15)";
+          slot.style.transform = "scale(1.05)";
+        }
+      };
+      
+      slot.ondragleave = e => {
+        if (!p.matched) {
+          slot.style.borderColor = "rgba(139, 233, 253, 0.5)";
+          slot.style.background = "rgba(0,0,0,0.4)";
+          slot.style.transform = "scale(1)";
+        }
+      };
+      
+      slot.ondrop = e => this.handleDrop(e, p, slot);
+      
+      this.patientSlots[p.id] = slot;
       patientArea.appendChild(slot);
     });
     this.container.appendChild(patientArea);
 
-    // Eszközök
     const tools = [
-      { id: "bandage", text: "Bandage 🩹" },
-      { id: "icepack", text: "Ice Pack ❄️" },
-      { id: "water", text: "Water 💧" }
+      { id: "bandage", text: "Bandage", emoji: "🩹" },
+      { id: "icepack", text: "Ice Pack", emoji: "❄️" },
+      { id: "water", text: "Clean Water", emoji: "💧" }
     ];
 
     const toolArea = document.createElement("div");
-    Object.assign(toolArea.style, { display: "flex", gap: "20px", marginTop: "40px" });
+    Object.assign(toolArea.style, {
+      display: "flex", gap: "20px", marginTop: "20px"
+    });
 
+    this.toolElements = {};
     tools.forEach(t => {
       const item = document.createElement("div");
       item.id = t.id;
-      item.innerText = t.text;
       Object.assign(item.style, {
-        width: "100px", height: "100px", background: "#fff", borderRadius: "10px",
-        textAlign: "center", lineHeight: "100px", cursor: "grab"
+        width: "140px", height: "140px",
+        background: "linear-gradient(135deg, rgba(139, 233, 253, 0.3) 0%, rgba(139, 233, 253, 0.2) 100%)",
+        borderRadius: "15px", border: "2px solid rgba(139, 233, 253, 0.5)",
+        display: "flex", flexDirection: "column",
+        justifyContent: "center", alignItems: "center",
+        cursor: "grab", transition: "all 0.3s ease",
+        backdropFilter: "blur(10px)"
       });
+      
+      const emoji = document.createElement("div");
+      emoji.innerText = t.emoji;
+      emoji.style.fontSize = "48px";
+      emoji.style.marginBottom = "10px";
+      item.appendChild(emoji);
+      
+      const text = document.createElement("div");
+      text.innerText = t.text;
+      text.style.fontSize = "16px";
+      text.style.fontWeight = "bold";
+      text.style.color = "white";
+      item.appendChild(text);
+      
       item.draggable = true;
-      item.ondragstart = e => e.dataTransfer.setData("tool", t.id);
+      item.ondragstart = e => {
+        e.dataTransfer.setData("tool", t.id);
+        item.style.opacity = "0.5";
+        item.style.cursor = "grabbing";
+      };
+      item.ondragend = e => {
+        item.style.opacity = "1";
+        item.style.cursor = "grab";
+      };
+      item.onmouseenter = () => {
+        if (item.draggable) {
+          item.style.transform = "scale(1.1) rotate(-3deg)";
+          item.style.boxShadow = "0 8px 25px rgba(139, 233, 253, 0.4)";
+        }
+      };
+      item.onmouseleave = () => {
+        item.style.transform = "scale(1) rotate(0deg)";
+        item.style.boxShadow = "none";
+      };
+      
+      this.toolElements[t.id] = item;
       toolArea.appendChild(item);
     });
     this.container.appendChild(toolArea);
@@ -719,54 +930,145 @@ class FirstAidMinigame {
     document.body.appendChild(this.container);
   }
 
-  handleDrop(e, patient) {
+  updateScore() {
+    this.scoreDisplay.innerHTML = `
+      ✅ Correct: ${this.correctMatches}/${this.totalNeeded} &nbsp;&nbsp;|&nbsp;&nbsp;
+      ❌ Wrong: ${this.wrongAttempts}/${this.maxWrong}
+    `;
+  }
+
+  handleDrop(e, patient, slot) {
+    e.preventDefault();
     const tool = e.dataTransfer.getData("tool");
+    
+    if (patient.matched) return;
+    
+    slot.style.borderColor = "rgba(139, 233, 253, 0.5)";
+    slot.style.background = "rgba(0,0,0,0.4)";
+    slot.style.transform = "scale(1)";
+    
     if (tool === patient.correct) {
+      patient.matched = true;
       this.correctMatches++;
-      document.getElementById(patient.id).style.background = "green";
-      if (this.correctMatches >= this.totalNeeded) this.end(true);
+      slot.style.background = "linear-gradient(135deg, rgba(74, 222, 128, 0.3) 0%, rgba(34, 197, 94, 0.2) 100%)";
+      slot.style.borderColor = "#4ade80";
+      slot.style.borderStyle = "solid";
+      slot.style.animation = "successPulse 0.5s ease-out";
+      
+      const toolEl = this.toolElements[tool];
+      if (toolEl) {
+        toolEl.style.opacity = "0.3";
+        toolEl.draggable = false;
+        toolEl.style.cursor = "not-allowed";
+      }
+      
+      this.updateScore();
+      
+      if (this.correctMatches >= this.totalNeeded) {
+        setTimeout(() => this.end(true), 800);
+      }
     } else {
-      this.failCount++;
-      document.getElementById(patient.id).style.background = "red";
-      if (this.failCount >= this.maxFails) this.end(false);
+      this.wrongAttempts++;
+      slot.style.background = "linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(220, 38, 38, 0.2) 100%)";
+      slot.style.animation = "shake 0.5s";
+      
+      setTimeout(() => {
+        if (!patient.matched) {
+          slot.style.background = "rgba(0,0,0,0.4)";
+          slot.style.animation = "";
+        }
+      }, 500);
+      
+      this.updateScore();
+      
+      if (this.wrongAttempts >= this.maxWrong) {
+        setTimeout(() => this.end(false), 800);
+      }
     }
   }
 
   end(success) {
-    if (this.container && this.container.parentNode) this.container.remove();
-    if (success) this.successCallback();
-    else this.failCallback();
+    const result = document.createElement("div");
+    Object.assign(result.style, {
+      position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+      background: "rgba(0,0,0,0.9)", padding: "40px 60px", borderRadius: "20px",
+      border: `3px solid ${success ? "#4ade80" : "#ef4444"}`,
+      textAlign: "center", animation: "scaleIn 0.3s ease-out", zIndex: "10000"
+    });
+    result.innerHTML = `
+      <div style="font-size: 64px; margin-bottom: 20px;">${success ? "🏥✅" : "❌"}</div>
+      <div style="color: ${success ? "#4ade80" : "#ef4444"}; font-size: 28px; font-weight: bold; margin-bottom: 10px;">
+        ${success ? "All Patients Treated!" : "Too Many Mistakes!"}
+      </div>
+      <div style="color: #94a3b8; font-size: 18px;">
+        ${success ? "Excellent medical skills!" : "Review your first aid procedures."}
+      </div>
+    `;
+    this.container.appendChild(result);
+
+    setTimeout(() => {
+      if (this.container && this.container.parentNode) this.container.remove();
+      if (success) this.successCallback();
+      else this.failCallback();
+    }, 2000);
   }
 }
 
-// ------------------ Library Memory (memory-card) Minigame ------------------
+function startFirstAidMinigame(successNext, failNext) {
+  new FirstAidMinigame(
+    () => { currentScene = successNext; lineIndex = 0; showLine(); },
+    () => { currentScene = failNext; lineIndex = 0; showLine(); }
+  );
+}
+
+// ------------------ Enhanced Library Memory Minigame ------------------
+// ------------------ Enhanced Library Memory Minigame ------------------
 function startLibraryMinigame(successNext, failNext) {
   mainGame.style.display = "none";
-  minigameScreen.style.display = "block";
-  minigameTitle.textContent = "Library Memory Challenge";
+  minigameScreen.style.display = "flex";
+  minigameTitle.textContent = "📚 Library Memory Challenge";
+  minigameTime.style.display = "none";
   minigameResult.textContent = "";
 
   const memoryContainer = document.createElement("div");
   memoryContainer.id = "memoryContainer";
-  memoryContainer.style.display = "grid";
-  memoryContainer.style.gridTemplateColumns = "repeat(4, 100px)";
-  memoryContainer.style.gridGap = "10px";
-  minigameScreen.appendChild(memoryContainer);
+  Object.assign(memoryContainer.style, {
+    display: "grid",
+    gridTemplateColumns: "repeat(4, 120px)",
+    gridGap: "15px",
+    padding: "20px"
+  });
 
-  // Terms + definitions pairs
   const cardsData = [
-    {text: "Atom", pair: "Alapvető részecske"},
-    {text: "Molekula", pair: "Két vagy több atom összekapcsolódása"},
-    {text: "Fotoszintézis", pair: "Növények energiatermelése fényből"},
-    {text: "Gravitáció", pair: "Tömegek vonzása egymáshoz"}
+    {text: "Atom", pair: "Basic particle"},
+    {text: "Molecule", pair: "Atoms bonded"},
+    {text: "Photosynthesis", pair: "Plant energy"},
+    {text: "Gravity", pair: "Mass attraction"}
   ];
-  // Duplicate and shuffle
+  
   const cards = [];
-  cardsData.forEach(c => { cards.push({text:c.text, pair:c.pair}); cards.push({text:c.pair, pair:c.text}); });
+  cardsData.forEach(c => {
+    cards.push({text:c.text, pair:c.pair, id: c.text});
+    cards.push({text:c.pair, pair:c.text, id: c.text});
+  });
   cards.sort(() => Math.random()-0.5);
 
   let firstCard = null;
   let matchedPairs = 0;
+  let attempts = 0;
+  let canClick = true;
+
+  const scoreDiv = document.createElement("div");
+  Object.assign(scoreDiv.style, {
+    color: "#f1fa8c", fontSize: "20px", marginBottom: "20px",
+    background: "rgba(0,0,0,0.5)", padding: "10px 25px", borderRadius: "10px",
+    border: "2px solid rgba(139, 233, 253, 0.3)", textAlign: "center"
+  });
+  const updateScore = () => {
+    scoreDiv.textContent = `Matches: ${matchedPairs}/${cardsData.length} | Attempts: ${attempts}`;
+  };
+  updateScore();
+  minigameScreen.insertBefore(scoreDiv, minigameScreen.children[1]);
 
   cards.forEach((c, index) => {
     const card = document.createElement("button");
@@ -774,49 +1076,578 @@ function startLibraryMinigame(successNext, failNext) {
     card.textContent = "?";
     card.dataset.text = c.text;
     card.dataset.pair = c.pair;
+    card.dataset.id = c.id;
+    card.dataset.flipped = "false";
+    
+    Object.assign(card.style, {
+      width: "120px", height: "120px",
+      background: "linear-gradient(135deg, rgba(139, 233, 253, 0.3) 0%, rgba(139, 233, 253, 0.2) 100%)",
+      border: "2px solid rgba(139, 233, 253, 0.5)",
+      borderRadius: "12px", cursor: "pointer", fontSize: "16px",
+      color: "white", transition: "all 0.3s ease",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      textAlign: "center", padding: "10px", fontWeight: "bold",
+      backdropFilter: "blur(10px)"
+    });
+    
     memoryContainer.appendChild(card);
 
+    card.onmouseenter = () => {
+      if (card.dataset.flipped === "false") {
+        card.style.transform = "scale(1.05)";
+        card.style.boxShadow = "0 4px 15px rgba(139, 233, 253, 0.4)";
+      }
+    };
+    card.onmouseleave = () => {
+      if (card.dataset.flipped === "false") {
+        card.style.transform = "scale(1)";
+        card.style.boxShadow = "none";
+      }
+    };
+
     card.onclick = () => {
-      if (card.textContent !== "?") return; // already flipped
+      if (!canClick || card.dataset.flipped === "true") return;
+      
+      card.dataset.flipped = "true";
       card.textContent = c.text;
+      card.style.background = "linear-gradient(135deg, rgba(139, 233, 253, 0.5) 0%, rgba(139, 233, 253, 0.3) 100%)";
+      card.style.transform = "rotateY(180deg)";
+      
       if (!firstCard) {
         firstCard = card;
       } else {
-        if (firstCard.dataset.pair === card.dataset.text) {
-          // success
+        canClick = false;
+        attempts++;
+        updateScore();
+        
+        if (firstCard.dataset.id === card.dataset.id && firstCard !== card) {
           matchedPairs++;
           player.knowledge += 2;
           updateStatsDisplay();
+          updateScore();
+          
+          firstCard.style.background = "linear-gradient(135deg, rgba(74, 222, 128, 0.5) 0%, rgba(34, 197, 94, 0.3) 100%)";
+          card.style.background = "linear-gradient(135deg, rgba(74, 222, 128, 0.5) 0%, rgba(34, 197, 94, 0.3) 100%)";
+          firstCard.style.borderColor = "#4ade80";
+          card.style.borderColor = "#4ade80";
+          firstCard.style.cursor = "default";
+          card.style.cursor = "default";
+          
           firstCard = null;
+          canClick = true;
+          
           if (matchedPairs === cardsData.length) {
-            endLibraryMinigame(true);
+            setTimeout(() => endLibraryMinigame(true), 800);
           }
         } else {
-          // fail - flip back after delay
           setTimeout(() => {
             firstCard.textContent = "?";
             card.textContent = "?";
+            firstCard.dataset.flipped = "false";
+            card.dataset.flipped = "false";
+            firstCard.style.background = "linear-gradient(135deg, rgba(139, 233, 253, 0.3) 0%, rgba(139, 233, 253, 0.2) 100%)";
+            card.style.background = "linear-gradient(135deg, rgba(139, 233, 253, 0.3) 0%, rgba(139, 233, 253, 0.2) 100%)";
+            firstCard.style.transform = "rotateY(0deg)";
+            card.style.transform = "rotateY(0deg)";
             firstCard = null;
+            canClick = true;
           }, 1000);
         }
       }
     };
   });
 
-  minigameQuit.onclick = () => endLibraryMinigame(false);
+  minigameScreen.appendChild(memoryContainer);
 
   function endLibraryMinigame(success) {
-    // cleanup
-    if (memoryContainer && memoryContainer.parentNode) minigameScreen.removeChild(memoryContainer);
-    minigameScreen.style.display = "none";
-    mainGame.style.display = "block";
-    minigameResult.textContent = success ? "You completed the library challenge!" : "You quit the library minigame.";
-    if (success) advanceStory(successNext);
-    else advanceStory(failNext);
+    const result = document.createElement("div");
+    Object.assign(result.style, {
+      position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+      background: "rgba(0,0,0,0.9)", padding: "40px 60px", borderRadius: "20px",
+      border: `3px solid ${success ? "#4ade80" : "#ef4444"}`,
+      textAlign: "center", animation: "scaleIn 0.3s ease-out", zIndex: "10000"
+    });
+    result.innerHTML = `
+      <div style="font-size: 64px; margin-bottom: 20px;">${success ? "📚✅" : "❌"}</div>
+      <div style="color: ${success ? "#4ade80" : "#ef4444"}; font-size: 28px; font-weight: bold; margin-bottom: 10px;">
+        ${success ? "All Pairs Matched!" : "Time's Up!"}
+      </div>
+      <div style="color: #94a3b8; font-size: 18px;">
+        ${success ? "Excellent memory skills!" : "Review your study techniques."}
+      </div>
+    `;
+    minigameScreen.appendChild(result);
+
+    setTimeout(() => {
+      if (scoreDiv && scoreDiv.parentNode) scoreDiv.remove();
+      if (memoryContainer && memoryContainer.parentNode) memoryContainer.remove();
+      if (result && result.parentNode) result.remove();
+      minigameScreen.style.display = "none";
+      mainGame.style.display = "flex";
+      
+      currentScene = success ? successNext : failNext;
+      lineIndex = 0;
+      showLine();
+    }, 2000);
+  }
+}
+// ------------------ Enhanced Rock Identification Minigame ------------------
+function startRockMinigame(successNext, failNext) {
+  const rock = rocks[Math.floor(Math.random() * rocks.length)];
+  const options = [rock.name];
+
+  while (options.length < 4) {
+    const fake = rocks[Math.floor(Math.random() * rocks.length)].name;
+    if (!options.includes(fake)) options.push(fake);
+  }
+  options.sort(() => Math.random() - 0.5);
+
+  const container = document.createElement("div");
+  Object.assign(container.style, {
+    position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+    background: "linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(22, 33, 62, 0.98) 100%)",
+    display: "flex", flexDirection: "column", justifyContent: "center",
+    alignItems: "center", zIndex: 9999, padding: "40px"
+  });
+
+  const title = document.createElement("h2");
+  title.innerText = "🪨 Rock Identification Lab";
+  Object.assign(title.style, {
+    color: "#8be9fd", fontSize: "36px", marginBottom: "10px",
+    textShadow: "0 0 20px rgba(139, 233, 253, 0.6)"
+  });
+  container.appendChild(title);
+
+  const subtitle = document.createElement("div");
+  subtitle.innerText = "Identify the rock specimen shown below";
+  Object.assign(subtitle.style, {
+    color: "#94a3b8", fontSize: "18px", marginBottom: "30px"
+  });
+  container.appendChild(subtitle);
+
+  const imgFrame = document.createElement("div");
+  Object.assign(imgFrame.style, {
+    padding: "20px",
+    background: "linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 100%)",
+    borderRadius: "20px",
+    border: "3px solid rgba(139, 233, 253, 0.5)",
+    marginBottom: "40px",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.5)"
+  });
+
+  const img = document.createElement("img");
+  img.src = `images/${rock.image}`;
+  Object.assign(img.style, {
+    width: "300px",
+    height: "300px",
+    objectFit: "cover",
+    borderRadius: "15px",
+    display: "block"
+  });
+  imgFrame.appendChild(img);
+  container.appendChild(imgFrame);
+
+  const optionsContainer = document.createElement("div");
+  Object.assign(optionsContainer.style, {
+    display: "grid",
+    gridTemplateColumns: "repeat(2, 1fr)",
+    gap: "15px",
+    maxWidth: "500px"
+  });
+
+  options.forEach((name, index) => {
+    const btn = document.createElement("button");
+    btn.innerText = name;
+    Object.assign(btn.style, {
+      padding: "20px 30px",
+      fontSize: "18px",
+      fontWeight: "bold",
+      background: "linear-gradient(135deg, rgba(139, 233, 253, 0.2) 0%, rgba(139, 233, 253, 0.1) 100%)",
+      border: "2px solid rgba(139, 233, 253, 0.5)",
+      borderRadius: "12px",
+      color: "white",
+      cursor: "pointer",
+      transition: "all 0.3s ease",
+      backdropFilter: "blur(10px)"
+    });
+
+    btn.onmouseenter = () => {
+      btn.style.background = "linear-gradient(135deg, rgba(139, 233, 253, 0.4) 0%, rgba(139, 233, 253, 0.2) 100%)";
+      btn.style.transform = "scale(1.05)";
+      btn.style.boxShadow = "0 6px 20px rgba(139, 233, 253, 0.4)";
+    };
+
+    btn.onmouseleave = () => {
+      btn.style.background = "linear-gradient(135deg, rgba(139, 233, 253, 0.2) 0%, rgba(139, 233, 253, 0.1) 100%)";
+      btn.style.transform = "scale(1)";
+      btn.style.boxShadow = "none";
+    };
+
+    btn.onclick = () => {
+      optionsContainer.querySelectorAll("button").forEach(b => {
+        b.style.pointerEvents = "none";
+        b.style.opacity = "0.5";
+      });
+
+      const isCorrect = name === rock.name;
+      
+      if (isCorrect) {
+        btn.style.background = "linear-gradient(135deg, rgba(74, 222, 128, 0.5) 0%, rgba(34, 197, 94, 0.3) 100%)";
+        btn.style.borderColor = "#4ade80";
+        btn.style.opacity = "1";
+        btn.innerHTML = `✅ ${name}`;
+      } else {
+        btn.style.background = "linear-gradient(135deg, rgba(239, 68, 68, 0.5) 0%, rgba(220, 38, 38, 0.3) 100%)";
+        btn.style.borderColor = "#ef4444";
+        btn.style.opacity = "1";
+        btn.innerHTML = `❌ ${name}`;
+        container.style.animation = "shake 0.5s";
+        
+        optionsContainer.querySelectorAll("button").forEach(b => {
+          if (b.innerText.includes(rock.name) || b.innerText === rock.name) {
+            b.style.background = "linear-gradient(135deg, rgba(74, 222, 128, 0.5) 0%, rgba(34, 197, 94, 0.3) 100%)";
+            b.style.borderColor = "#4ade80";
+            b.style.opacity = "1";
+            b.innerHTML = `✅ ${rock.name}`;
+          }
+        });
+      }
+
+      setTimeout(() => {
+        const result = document.createElement("div");
+        Object.assign(result.style, {
+          position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+          background: "rgba(0,0,0,0.95)", padding: "40px 60px", borderRadius: "20px",
+          border: `3px solid ${isCorrect ? "#4ade80" : "#ef4444"}`,
+          textAlign: "center", animation: "scaleIn 0.3s ease-out", zIndex: "10000"
+        });
+        result.innerHTML = `
+          <div style="font-size: 64px; margin-bottom: 20px;">${isCorrect ? "🪨✅" : "❌"}</div>
+          <div style="color: ${isCorrect ? "#4ade80" : "#ef4444"}; font-size: 28px; font-weight: bold; margin-bottom: 10px;">
+            ${isCorrect ? "Correct Identification!" : "Incorrect!"}
+          </div>
+          <div style="color: #94a3b8; font-size: 18px;">
+            The rock is: <span style="color: #8be9fd; font-weight: bold;">${rock.name}</span>
+          </div>
+        `;
+        container.appendChild(result);
+
+        setTimeout(() => {
+          if (container.parentNode) container.remove();
+          currentScene = isCorrect ? successNext : failNext;
+          lineIndex = 0;
+          showLine();
+        }, 2500);
+      }, 1000);
+    };
+
+    optionsContainer.appendChild(btn);
+  });
+
+  container.appendChild(optionsContainer);
+  document.body.appendChild(container);
+}
+
+// ------------------ Enhanced Café Minigame ------------------
+let cafeMinigameState = null;
+
+function startCafeMinigame(config) {
+  mainGame.style.display = "none";
+  minigameScreen.style.display = "flex";
+  minigameResult.textContent = "";
+  ordersContainer.innerHTML = "";
+  minigameTitle.textContent = "☕ Campus Café Shift";
+
+  const difficulty = config.difficulty || "easy";
+  const settings = {
+    duration: difficulty === "easy" ? 30 : 20,
+    spawnInterval: difficulty === "easy" ? 2000 : 1500,
+    maxActiveOrders: difficulty === "easy" ? 4 : 6,
+    rewardPerOrder: difficulty === "easy" ? 10 : 15
+  };
+
+  cafeMinigameState = {
+    type: "cafe",
+    settings,
+    timeLeft: settings.duration,
+    activeOrders: 0,
+    served: 0,
+    missed: 0,
+    intervalIds: [],
+    combo: 0,
+    maxCombo: 0
+  };
+
+  const statsPanel = document.createElement("div");
+  Object.assign(statsPanel.style, {
+    background: "rgba(0,0,0,0.7)",
+    padding: "20px 30px",
+    borderRadius: "15px",
+    border: "2px solid rgba(139, 233, 253, 0.5)",
+    marginBottom: "20px",
+    display: "flex",
+    gap: "30px",
+    justifyContent: "center",
+    backdropFilter: "blur(10px)"
+  });
+
+  const createStat = (label, value, color = "#f1fa8c") => {
+    const stat = document.createElement("div");
+    stat.innerHTML = `
+      <div style="color: #94a3b8; font-size: 14px; margin-bottom: 5px;">${label}</div>
+      <div style="color: ${color}; font-size: 24px; font-weight: bold;" class="stat-value">${value}</div>
+    `;
+    return stat;
+  };
+
+  const timeDisplay = createStat("Time", cafeMinigameState.timeLeft + "s", "#8be9fd");
+  const servedDisplay = createStat("Served", cafeMinigameState.served, "#4ade80");
+  const comboDisplay = createStat("Combo", "x" + cafeMinigameState.combo, "#fbbf24");
+  const moneyDisplay = createStat("Earned", cafeMinigameState.served * settings.rewardPerOrder + " 💰", "#8be9fd");
+
+  statsPanel.appendChild(timeDisplay);
+  statsPanel.appendChild(servedDisplay);
+  statsPanel.appendChild(comboDisplay);
+  statsPanel.appendChild(moneyDisplay);
+
+  minigameScreen.insertBefore(statsPanel, minigameScreen.children[1]);
+
+  const updateStats = () => {
+    timeDisplay.querySelector(".stat-value").textContent = cafeMinigameState.timeLeft + "s";
+    servedDisplay.querySelector(".stat-value").textContent = cafeMinigameState.served;
+    comboDisplay.querySelector(".stat-value").textContent = "x" + cafeMinigameState.combo;
+    moneyDisplay.querySelector(".stat-value").textContent = (cafeMinigameState.served * settings.rewardPerOrder) + " 💰";
+  };
+
+  const orderTypes = [
+    { name: "☕ Coffee", time: 5000, color: "#8b4513" },
+    { name: "🥪 Sandwich", time: 6000, color: "#daa520" },
+    { name: "🧃 Juice", time: 4000, color: "#ff6347" },
+    { name: "🌯 Wrap", time: 6000, color: "#98fb98" },
+    { name: "🥗 Salad", time: 7000, color: "#90ee90" }
+  ];
+
+  const spawnLoop = setInterval(() => {
+    if (cafeMinigameState.activeOrders < settings.maxActiveOrders) spawnCafeOrder();
+  }, settings.spawnInterval);
+  cafeMinigameState.intervalIds.push(spawnLoop);
+
+  const countdown = setInterval(() => {
+    cafeMinigameState.timeLeft--;
+    updateStats();
+    if (cafeMinigameState.timeLeft <= 0) endCafeMinigame();
+  }, 1000);
+  cafeMinigameState.intervalIds.push(countdown);
+
+  minigameQuit.onclick = () => endCafeMinigame(true);
+
+  function spawnCafeOrder() {
+    const orderType = orderTypes[Math.floor(Math.random() * orderTypes.length)];
+    const orderId = `order_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+    const orderCard = document.createElement("div");
+    orderCard.id = orderId;
+    Object.assign(orderCard.style, {
+      width: "160px",
+      padding: "20px",
+      background: `linear-gradient(135deg, ${orderType.color}40 0%, ${orderType.color}20 100%)`,
+      border: `3px solid ${orderType.color}80`,
+      borderRadius: "15px",
+      cursor: "pointer",
+      transition: "all 0.3s ease",
+      position: "relative",
+      overflow: "hidden",
+      backdropFilter: "blur(10px)"
+    });
+
+    const orderText = document.createElement("div");
+    orderText.textContent = orderType.name;
+    Object.assign(orderText.style, {
+      fontSize: "24px",
+      fontWeight: "bold",
+      color: "white",
+      textAlign: "center",
+      marginBottom: "10px"
+    });
+    orderCard.appendChild(orderText);
+
+    const progressBar = document.createElement("div");
+    Object.assign(progressBar.style, {
+      width: "100%",
+      height: "8px",
+      background: "rgba(0,0,0,0.3)",
+      borderRadius: "4px",
+      overflow: "hidden"
+    });
+
+    const progressFill = document.createElement("div");
+    Object.assign(progressFill.style, {
+      width: "100%",
+      height: "100%",
+      background: `linear-gradient(90deg, ${orderType.color} 0%, #ef4444 100%)`,
+      transition: `width ${orderType.time}ms linear`,
+      borderRadius: "4px"
+    });
+    progressBar.appendChild(progressFill);
+    orderCard.appendChild(progressBar);
+
+    ordersContainer.appendChild(orderCard);
+    cafeMinigameState.activeOrders++;
+
+    setTimeout(() => {
+      progressFill.style.width = "0%";
+    }, 50);
+
+    orderCard.onmouseenter = () => {
+      orderCard.style.transform = "scale(1.1) rotate(-2deg)";
+      orderCard.style.boxShadow = `0 8px 25px ${orderType.color}60`;
+    };
+
+    orderCard.onmouseleave = () => {
+      orderCard.style.transform = "scale(1) rotate(0deg)";
+      orderCard.style.boxShadow = "none";
+    };
+
+    orderCard.onclick = () => {
+      cafeMinigameState.served++;
+      cafeMinigameState.combo++;
+      if (cafeMinigameState.combo > cafeMinigameState.maxCombo) {
+        cafeMinigameState.maxCombo = cafeMinigameState.combo;
+      }
+      cafeMinigameState.activeOrders--;
+
+      orderCard.style.background = "linear-gradient(135deg, rgba(74, 222, 128, 0.5) 0%, rgba(34, 197, 94, 0.3) 100%)";
+      orderCard.style.borderColor = "#4ade80";
+      orderCard.style.transform = "scale(1.2)";
+      orderCard.style.animation = "successPulse 0.3s ease-out";
+
+      setTimeout(() => {
+        if (orderCard.parentNode) orderCard.remove();
+      }, 300);
+
+      player.money += settings.rewardPerOrder;
+      player.social += 1;
+      updateStatsDisplay();
+      updateStats();
+    };
+
+    setTimeout(() => {
+      const el = document.getElementById(orderId);
+      if (el && el.parentNode) {
+        cafeMinigameState.combo = 0;
+        cafeMinigameState.missed++;
+        
+        el.style.background = "linear-gradient(135deg, rgba(239, 68, 68, 0.5) 0%, rgba(220, 38, 38, 0.3) 100%)";
+        el.style.animation = "shake 0.3s";
+        
+        setTimeout(() => {
+          if (el.parentNode) el.remove();
+        }, 300);
+        
+        cafeMinigameState.activeOrders = Math.max(0, cafeMinigameState.activeOrders - 1);
+        updateStats();
+      }
+    }, orderType.time);
+  }
+
+  for (let i = 0; i < Math.min(2, settings.maxActiveOrders); i++) {
+    setTimeout(() => spawnCafeOrder(), i * 500);
+  }
+
+  function endCafeMinigame(quit = false) {
+    cafeMinigameState.intervalIds.forEach(id => clearInterval(id));
+    cafeMinigameState.intervalIds = [];
+    
+    const served = cafeMinigameState.served;
+    const missed = cafeMinigameState.missed;
+    const reward = served * settings.rewardPerOrder;
+    const maxCombo = cafeMinigameState.maxCombo;
+
+    if (!quit) {
+      player.knowledge += Math.floor(served / 2);
+      player.social += Math.floor(served / 3);
+      updateStatsDisplay();
+    }
+
+    const results = document.createElement("div");
+    Object.assign(results.style, {
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      background: "rgba(0,0,0,0.95)",
+      padding: "40px 60px",
+      borderRadius: "20px",
+      border: "3px solid rgba(139, 233, 253, 0.5)",
+      textAlign: "center",
+      animation: "scaleIn 0.3s ease-out",
+      zIndex: "10000",
+      minWidth: "400px"
+    });
+
+    results.innerHTML = `
+      <div style="font-size: 48px; margin-bottom: 20px;">☕✅</div>
+      <div style="color: #8be9fd; font-size: 32px; font-weight: bold; margin-bottom: 20px;">
+        Shift Complete!
+      </div>
+      <div style="color: #e0e0e0; font-size: 18px; line-height: 2;">
+        <div>📦 Orders Served: <span style="color: #4ade80; font-weight: bold;">${served}</span></div>
+        <div>❌ Orders Missed: <span style="color: #ef4444; font-weight: bold;">${missed}</span></div>
+        <div>🔥 Max Combo: <span style="color: #fbbf24; font-weight: bold;">x${maxCombo}</span></div>
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid rgba(139, 233, 253, 0.3);">
+          💰 Total Earned: <span style="color: #8be9fd; font-weight: bold; font-size: 24px;">${reward} Unicoin</span>
+        </div>
+      </div>
+    `;
+
+    minigameScreen.appendChild(results);
+
+    setTimeout(() => {
+      if (statsPanel && statsPanel.parentNode) statsPanel.remove();
+      if (results && results.parentNode) results.remove();
+      ordersContainer.innerHTML = "";
+      minigameScreen.style.display = "none";
+      mainGame.style.display = "flex";
+      
+      if (config.nextScene) {
+        currentScene = config.nextScene;
+        lineIndex = 0;
+      }
+      showLine();
+      saveGame();
+    }, 3000);
   }
 }
 
-// ------------------ chooseOption / applyStats / money ------------------
+// Add CSS animations
+const style = document.createElement("style");
+style.textContent = `
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+  }
+  
+  @keyframes scaleIn {
+    from { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+    to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  }
+  
+  @keyframes successPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  
+  @keyframes particle-0 { to { transform: translate(30px, -30px); opacity: 0; } }
+  @keyframes particle-1 { to { transform: translate(40px, 0px); opacity: 0; } }
+  @keyframes particle-2 { to { transform: translate(30px, 30px); opacity: 0; } }
+  @keyframes particle-3 { to { transform: translate(0px, 40px); opacity: 0; } }
+  @keyframes particle-4 { to { transform: translate(-30px, 30px); opacity: 0; } }
+  @keyframes particle-5 { to { transform: translate(-40px, 0px); opacity: 0; } }
+  @keyframes particle-6 { to { transform: translate(-30px, -30px); opacity: 0; } }
+  @keyframes particle-7 { to { transform: translate(0px, -40px); opacity: 0; } }
+`;
+// ------------------ Major key mapping ------------------
 const majorKeyMap = {
   "Computer Science": "ComputerScience",
   "Psychology": "Psychology",
@@ -831,25 +1662,45 @@ function normalizeMajor(majorName) {
   return majorKeyMap[majorName] || majorName;
 }
 
+// ------------------ MiniGame framework ------------------
+function startMinigame(type, config = {}) {
+  switch(type) {
+    case "cafe":
+      startCafeMinigame(config);
+      break;
+    case "cheat":
+      startCheatMinigame(config.successNext, config.failNext);
+      break;
+    case "library":
+      startLibraryMinigame(config.successNext, config.failNext);
+      break;
+    case "firstaid":
+      startFirstAidMinigame(config.successNext, config.failNext);
+      break;
+    case "rock":
+      startRockMinigame(config.successNext, config.failNext);
+      break;
+    default:
+      console.warn("Unknown minigame type:", type);
+      break;
+  }
+}
+
 // ------------------ chooseOption ------------------
 function chooseOption(choice) {
-  // Quiz pontok
   if (choice.points) {
     for (const major in choice.points) {
       quizScores[major] = (quizScores[major] || 0) + choice.points[major];
     }
   }
 
-  // Stats (skills, needs, money)
   if (choice.stats) applyStats(choice.stats);
   if (choice.moneyChange) applyMoney(choice.moneyChange);
 
-  // Ha van major mező, beállítjuk a player.major-t
   if (choice.major) {
     player.major = normalizeMajor(choice.major);
     applyMajorBonuses(player.major);
 
-    // automatikusan átugrunk a szakhoz tartozó scene-re
     const majorSceneMap = {
       "Psychology": "major_psychology",
       "ComputerScience": "major_cs",
@@ -862,10 +1713,9 @@ function chooseOption(choice) {
     currentScene = majorSceneMap[player.major] || "major_law";
     lineIndex = 0;
     showLine();
-    return; // ne fusson tovább
+    return;
   }
 
-  // Minijátékok
   if (choice.minigame) {
     const mg = choice.minigame;
     if (mg.type === "cheat" && mg.difficulty === "B2") {
@@ -877,14 +1727,12 @@ function chooseOption(choice) {
     }
   }
 
-  // Ha van next
   if (choice.next) {
     lineIndex = 0;
     currentScene = choice.next;
     showLine();
   }
 }
-
 
 function applyStats(stats) {
   for (const key in stats) {
@@ -894,7 +1742,6 @@ function applyStats(stats) {
     } else if (player.hasOwnProperty(key)) {
       player[key] += stats[key];
     } else {
-      // fallback: allow direct fields like "knowledge", "social"
       if (typeof player[key] === "number") player[key] += stats[key];
       else player[key] = stats[key];
     }
@@ -934,7 +1781,6 @@ function finishMajorQuiz() {
   currentScene = majorSceneMap[player.major] || "major_law";
   lineIndex = 0;
 
-  // reset quiz pontok
   quizScores = { 
     "Psychology": 0, 
     "ComputerScience": 0, 
@@ -946,66 +1792,29 @@ function finishMajorQuiz() {
   };
 
   showLine();
-
-  console.log("Chosen major:", chosenMajor);
-  console.log("Normalized major:", player.major);
-  console.log("Curriculum keys:", Object.keys(curriculum));
 }
 
-function chooseMajorManually(majorName) {
-  player.major = majorName;
-  applyMajorBonuses(majorName);
-  console.log("Major manually chosen:", player.major);
-
-  // Ha akarod, rögtön nyithatjuk a kezdő scene-t
-  const majorSceneMap = {
-    "Psychology": "major_psychology",
-    "ComputerScience": "major_cs",
-    "Law": "major_law",
-    "Business/Management": "major_business",
-    "Astronomy": "major_astronomy",
-    "Geology": "major_geology",
-    "Nursing": "major_nursing"
-  };
-
-  currentScene = majorSceneMap[majorName] || "major_psychology";
-  lineIndex = 0;
-  showLine();
+function applyMajorBonuses(major) {
+  switch (major) {
+    case "Marketing": player.skills.charisma += 2; player.social += 1; break;
+    case "Psychology": player.skills.logic += 2; player.skills.diplomacy += 1; break;
+    case "ComputerScience": player.skills.logic += 2; break;
+    case "Law": player.skills.logic += 2; player.skills.diplomacy += 1; break;
+    case "Astronomy": player.skills.logic += 2; break;
+    case "Geology": player.skills.logic += 2; break;
+    case "Nursing": player.skills.logic += 1; player.skills.diplomacy += 1; break;
+    case "Business/Management": player.skills.logic += 1; player.skills.charisma += 1; player.social += 1; break;
+  }
+  updateStatsDisplay();
 }
-const dormRoomScreen = document.getElementById("dormRoomScreen");
-const dormStats = document.getElementById("dormStats");
-const restBtn = document.getElementById("restBtn");
-const exitDormBtn = document.getElementById("exitDormBtn");
-const questList = document.getElementById("questList");
 
-
-exitDormBtn.onclick = () => {
-  console.log("[dorm] exitDormBtn clicked. currentScene before:", currentScene, "lineIndex:", lineIndex);
-
-  // bezárjuk a dorm képernyőt
-  dormRoomScreen.style.display = "none";
-  mainGame.style.display = "block";
-
-  // kis késleltetés, hogy minden DOM frissüljön rendesen
-  setTimeout(() => {
-    console.log("[dorm] calling advanceStory('next_day_morning')...");
-    advanceStory("next_day_morning");
-    console.log("[dorm] after advanceStory: currentScene:", currentScene, "lineIndex:", lineIndex);
-  }, 10);
-};
-
-
-// Példa questek
+// ------------------ Dorm Room ------------------
+let dormReturnScene = "next_day_morning";
 let availableQuests = [
   { name: "Tanulás a könyvtárban", rewardType: "knowledge", next: "library_scene" },
   { name: "Beszélgetés a szobatárssal", rewardType: "social", next: "roommate_scene" },
   { name: "Titkos akció az éjjel", rewardType: "stealth", next: "night_scene" }
 ];
-
-// Belépés a koli szobába
-
-
-let dormReturnScene = "next_day_morning"; // alapértelmezett
 
 function enterDormRoom(returnScene = "next_day_morning") {
   dormReturnScene = returnScene;
@@ -1014,23 +1823,6 @@ function enterDormRoom(returnScene = "next_day_morning") {
   renderDormRoom();
 }
 
-exitDormBtn.onclick = () => {
-  dormRoomScreen.style.display = "none";
-  mainGame.style.display = "block";
-  currentScene = dormReturnScene;   // <-- fontos!
-  lineIndex = 0;
-  showLine();                       // <-- ezzel indul újra a történet
-};
-
-
-exitDormBtn.onclick = () => {
-  dormRoomScreen.style.display = "none";
-  mainGame.style.display = "block";
-  advanceStory(dormReturnScene);
-};
-
-
-// Kirajzolás
 function renderDormRoom() {
   dormStats.innerHTML = `
     🍞 Hunger: ${createBar(player.needs.hunger)}<br>
@@ -1045,288 +1837,28 @@ function renderDormRoom() {
     btn.textContent = `${q.name} ${statIcons[q.rewardType] || ""}`;
     btn.onclick = () => {
       dormRoomScreen.style.display = "none";
-      mainGame.style.display = "block";
+      mainGame.style.display = "flex";
       advanceStory(q.next);
     };
     questList.appendChild(btn);
   });
 }
 
-// Pihenés gomb
 restBtn.onclick = () => {
   player.needs.fatigue = Math.max(0, player.needs.fatigue - 50);
   player.needs.hunger = Math.min(100, player.needs.hunger + 10);
   player.needs.thirst = Math.min(100, player.needs.thirst + 10);
   updateStatsDisplay();
-  dormStats.innerHTML = `
-    🍞 Éhség: ${player.needs.hunger}%<br>
-    💧 Szomjúság: ${player.needs.thirst}%<br>
-    😴 Fáradtság: ${player.needs.fatigue}%<br>
-    📚 Tudás: ${player.knowledge}<br>
-    🎉 Szociális: ${player.social}
-  `;
+  renderDormRoom();
   alert("Pihentél egyet. A fáradtság csökkent!");
   saveGame();
 };
 
 exitDormBtn.onclick = () => {
-  console.log("[Dorm] Kilépés a szobából, folytatás: next_day_morning");
   dormRoomScreen.style.display = "none";
-  mainGame.style.display = "block";
-  advanceStory("next_day_morning");
+  mainGame.style.display = "flex";
+  advanceStory(dormReturnScene);
 };
-
-
-
-
-function applyMajorBonuses(major) {
-  switch (major) {
-    case "Marketing": player.skills.charisma += 2; player.social += 1; break;
-    case "Psychology": player.skills.logic += 2; player.skills.diplomacy += 1; break;
-    case "ComputerScience": player.skills.logic += 2; break;
-    case "Law": player.skills.logic += 2; player.skills.diplomacy += 1; break;
-    case "Astronomy": player.skills.logic += 2; break;
-    case "Geology": player.skills.logic += 2; break;
-    case "Business/Management": player.skills.logic += 1; player.skills.charisma += 1; player.social += 1; break;
-  }
-  updateStatsDisplay();
-}
-
-// ------------------ MiniGame framework ------------------
-let minigameState = null;
-
-// Dispatcher
-function startMinigame(type, config = {}) {
-  switch(type) {
-    case "cafe":
-      startCafeMinigame(config);
-      break;
-    case "cheat":
-      startCheatMinigame(config.successNext, config.failNext);
-      break;
-    case "library":
-      startLibraryMinigame(config.successNext, config.failNext);
-      break;
-    case "firstaid": // 🔥 új típus
-      startFirstAidMinigame(config.successNext, config.failNext);
-      break;
-    case "rock": // új típus
-      startRockMinigame(config.successNext, config.failNext);
-      break;
-    default:
-      console.warn("Unknown minigame type:", type);
-      break;
-  }
-}
-
-function startFirstAidMinigame(successNext, failNext) {
-  new FirstAidMinigame(
-    () => { currentScene = successNext; lineIndex = 0; showLine(); },
-    () => { currentScene = failNext; lineIndex = 0; showLine(); }
-  );
-}
-
-
-
-
-
-
-// ------------------ Café Minigame ------------------
-function startCafeMinigame(config) {
-  mainGame.style.display = "none";
-  minigameScreen.style.display = "block";
-  minigameResult.textContent = "";
-  ordersContainer.innerHTML = "";
-  minigameTitle.textContent = "Café Shift";
-
-  const difficulty = config.difficulty || "easy";
-  const settings = {
-    duration: difficulty === "easy" ? 12 : 8,
-    spawnInterval: difficulty === "easy" ? 1200 : 800,
-    maxActiveOrders: difficulty === "easy" ? 4 : 6,
-    rewardPerOrder: difficulty === "easy" ? 10 : 15
-  };
-
-  // Shared state
-  minigameState = { type: "cafe", settings, timeLeft: settings.duration, activeOrders: 0, served: 0, intervalIds: [] };
-  minigameTime.textContent = minigameState.timeLeft;
-
-  // Spawn orders loop
-  const spawnLoop = setInterval(() => {
-    if (minigameState.activeOrders < settings.maxActiveOrders) spawnCafeOrder();
-  }, settings.spawnInterval);
-  minigameState.intervalIds.push(spawnLoop);
-
-  // Countdown
-  const countdown = setInterval(() => {
-    minigameState.timeLeft--;
-    minigameTime.textContent = minigameState.timeLeft;
-    if (minigameState.timeLeft <= 0) endCafeMinigame();
-  }, 1000);
-  minigameState.intervalIds.push(countdown);
-
-  // Quit button
-  minigameQuit.onclick = () => endCafeMinigame(true);
-
-  function spawnCafeOrder() {
-    const orderId = `order_${Date.now()}_${Math.floor(Math.random()*1000)}`;
-    const btn = document.createElement("button");
-    btn.className = "orderBtn";
-    const orderText = ["Sandwich","Coffee","Juice","Wrap","Salad"][Math.floor(Math.random()*5)];
-    btn.textContent = orderText;
-    btn.id = orderId;
-    ordersContainer.appendChild(btn);
-    minigameState.activeOrders++;
-
-    btn.onclick = () => {
-      minigameState.served++;
-      minigameState.activeOrders--;
-      if (btn.parentNode) btn.parentNode.removeChild(btn);
-      player.money += settings.rewardPerOrder;
-      player.social += 1;
-      updateStatsDisplay();
-    };
-
-    // Auto-expire
-    setTimeout(() => {
-      const el = document.getElementById(orderId);
-      if (el && el.parentNode) {
-        el.parentNode.removeChild(el);
-        minigameState.activeOrders = Math.max(0, minigameState.activeOrders - 1);
-      }
-    }, settings.spawnInterval * 5);
-  }
-
-  // initial orders
-  for (let i=0;i<Math.min(2, settings.maxActiveOrders);i++) spawnCafeOrder();
-
-  function endCafeMinigame(quit=false) {
-    minigameState.intervalIds.forEach(id => clearInterval(id));
-    minigameState.intervalIds = [];
-    const served = minigameState.served;
-    const reward = served * settings.rewardPerOrder;
-    minigameResult.textContent = quit ? `You quit. Served ${served} orders.` : `Shift over! You served ${served} orders and earned ${reward} Unicoin.`;
-    if (!quit) {
-      player.knowledge += Math.floor(served/2);
-      player.social += Math.floor(served/3);
-      updateStatsDisplay();
-    }
-    ordersContainer.innerHTML = "";
-    setTimeout(() => {
-      minigameScreen.style.display = "none";
-      mainGame.style.display = "block";
-      if (config.nextScene) {
-        currentScene = config.nextScene;
-        lineIndex = 0;
-      }
-      showLine();
-      saveGame();
-    }, 1400);
-  }
-}
-
-class RockMinigame {
-  constructor(successCallback, failCallback) {
-    this.successCallback = successCallback;
-    this.failCallback = failCallback;
-    this.createUI();
-  }
-
-  createUI() {
-    this.container = document.createElement("div");
-    Object.assign(this.container.style, { position: "fixed", top:0, left:0, width:"100%", height:"100%", background:"rgba(0,0,0,0.7)", display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center", zIndex:"9999" });
-
-    const img = document.createElement("img");
-    img.src = "rocks/rock1.png"; // ide jön a random rock
-    img.style.width = "200px";
-    img.style.height = "200px";
-    this.container.appendChild(img);
-
-    const options = ["Granite", "Basalt", "Sandstone"];
-    options.forEach(opt => {
-      const btn = document.createElement("button");
-      btn.innerText = opt;
-      btn.style.margin = "10px";
-      btn.onclick = () => this.checkAnswer(opt);
-      this.container.appendChild(btn);
-    });
-
-    document.body.appendChild(this.container);
-  }
-
-  checkAnswer(choice) {
-    if (choice === "Granite") this.successCallback();
-    else this.failCallback();
-    if (this.container.parentNode) this.container.remove();
-  }
-}
-
-
-function startRockMinigame(successNext, failNext) {
-  const rock = rocks[Math.floor(Math.random() * rocks.length)];
-  const options = [rock.name];
-
-  // Véletlenszerű "hamis" nevek
-  while (options.length < 3) {
-    const fake = rocks[Math.floor(Math.random() * rocks.length)].name;
-    if (!options.includes(fake)) options.push(fake);
-  }
-  options.sort(() => Math.random() - 0.5);
-
-  // UI
-  const container = document.createElement("div");
-  Object.assign(container.style, {position:"fixed", top:0, left:0, width:"100%", height:"100%", background:"rgba(0,0,0,0.7)", display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center", zIndex:9999});
-  
-  const img = document.createElement("img");
-  img.src = `images/${rock.image}`;
-  img.style.width = "200px";
-  container.appendChild(img);
-
-  options.forEach(name => {
-    const btn = document.createElement("button");
-    btn.innerText = name;
-    btn.style.margin = "10px";
-    btn.onclick = () => {
-      if (container.parentNode) container.remove();
-      if (name === rock.name) {
-        currentScene = successNext;
-      } else {
-        currentScene = failNext;
-      }
-      lineIndex = 0;
-      showLine();
-    };
-    container.appendChild(btn);
-  });
-
-  document.body.appendChild(container);
-}
-
-
-// ------------------ Job launcher (helper) ------------------
-function startJob(jobType, requiredLevel = 0) {
-  switch (jobType) {
-    case "Waiter":
-      startMinigame("cafe", { difficulty: "easy" });
-      break;
-    case "Internship":
-      if (player.knowledge >= requiredLevel) {
-        player.money += 100; player.knowledge += 1;
-        alert("Internship successful! Earned 100 Unicoin and knowledge +1.");
-      } else alert("Not qualified for this internship yet.");
-      break;
-    default:
-      alert("Job not implemented yet.");
-  }
-  updateStatsDisplay();
-  saveGame();
-}
-
-// quick test button visibility (for debug)
-if (startCafeBtn) {
-  startCafeBtn.style.display = "inline-block";
-  startCafeBtn.onclick = () => startMinigame("cafe", { difficulty: "easy" });
-}
 
 // ------------------ Save / Load / Reset ------------------
 function saveGame() {
@@ -1336,7 +1868,7 @@ function saveGame() {
     console.log("Game saved!");
   } catch (err) {
     console.error("Save failed:", err);
-    alert("Save failed — local storage may be full.");
+    alert("Save failed – local storage may be full.");
   }
 }
 
@@ -1349,7 +1881,10 @@ function loadGame() {
     lineIndex = data.lineIndex;
     startScreen.style.display = "none";
     customizationScreen.style.display = "none";
-    mainGame.style.display = "block";
+    mainGame.style.display = "flex";
+    
+    updateCharacterSprite();
+    
     loadScenes();
     console.log("Save loaded!");
     return true;
@@ -1378,7 +1913,9 @@ function resetGame() {
 function displayText(speaker, text) {
   nameBox.textContent = speaker;
   textBox.textContent = text;
-  choicesBox.innerHTML = ""; // clear old choices
+  choicesBox.innerHTML = "";
+  
+  handleCharacterDisplay(speaker);
 }
 
 function displayChoices(choices) {
@@ -1392,19 +1929,17 @@ function displayChoices(choices) {
   });
 }
 
-// ------------------ Click handler (single, fixed) ------------------
+// ------------------ Click handler ------------------
 textBox.onclick = () => {
   const scene = scenes[currentScene];
   if (!scene) return;
   const line = scene[lineIndex];
   if (!line) return;
 
-  // If this line has choices, display them and wait for user interaction
   if (line.choice) {
-    displayChoices(line.choice);  // Ki kell jeleníteni a választásokat
-    return;  // Várni kell, hogy a felhasználó válasszon
+    displayChoices(line.choice);
+    return;
   }
   
-  // Otherwise advance (showLine will handle incrementing the index)
   showLine();
 };

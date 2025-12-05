@@ -401,7 +401,7 @@ function loadScenes() {
     updateStatsDisplay();
     showLine();
   } else {
-    fetch("scenes.json")
+    fetch("scenes2.json")
       .then(res => res.json())
       .then(data => {
         scenes = data;
@@ -1943,3 +1943,4 @@ textBox.onclick = () => {
   
   showLine();
 };
+
